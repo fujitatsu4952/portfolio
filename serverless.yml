@@ -1,0 +1,37 @@
+service: tatsuya-portfolio
+
+plugins:
+  - serverless-scriptable-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: prd
+  region: ap-northeast-1
+  ## CloudFormationのLogのカスタマイズ
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource:
+        - "*"
+  profile: default
+  logRetentionInDays: 3
+
+custom:
+  defaultStage: dev
+  scriptHooks:
+    before:package:createDeploymentArtifacts:
+      # build
+      - yarn build
+    aws:deploy:finalize:cleanup:
+      # 現在の静的リソースのコピー
+      - aws s3 cp --recursive ./dist/ s3://${file(./_config/env.yml):BUCKET_NAME}/ --cache-control "max-age=31536000,public,immutable"
+
+resources:
+  # CloudFront
+  - ${file(./_config/cloudFront.yml)}
+  # Nuxt
+  - ${file(./_config/s3.yml)} # S3 Origin
