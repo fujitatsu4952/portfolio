@@ -1,0 +1,44 @@
+Resources:
+  # SPAのS3
+  SPABucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${file(./_config/env.yml):BUCKET_NAME}
+      AccessControl: PublicRead
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - "*"
+            AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            MaxAge: 3000
+  # SPAのBucketPolicy
+  SPABucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: { Ref: SPABucket }
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "s3:GetObject"
+            Effect: Allow
+            Resource:
+              { "Fn::Join": ["", ["arn:aws:s3:::", { Ref: SPABucket }, "/*"]] }
+            Principal:
+              AWS:
+                {
+                  "Fn::Join":
+                    [
+                      " ",
+                      [
+                        "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity",
+                        { Ref: SPAOriginAccessIdentity },
+                      ],
+                    ],
+                }

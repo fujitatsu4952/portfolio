@@ -1,0 +1,58 @@
+Resources:
+  # Nuxt CludFrontのオリジンのIdentity
+  SPAOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: "CloudFrontOriginAccessIdentity for spa"
+  # Nuxt CludFrontのDistribution
+  SPADistribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Aliases: ${file(./_config/env.yml):DOMAINS}
+        ViewerCertificate:
+          AcmCertificateArn: arn:aws:acm:us-east-2:036449064740:certificate/29030e2c-ac00-4eae-b648-746c338cd3b1
+          SslSupportMethod: sni-only
+        DefaultCacheBehavior:
+          TargetOriginId: "SPAOrigin"
+          ViewerProtocolPolicy: "redirect-to-https"
+          MinTTL: 3000
+          DefaultTTL: 3000
+          MaxTTL: 3000
+          Compress: true
+          ForwardedValues:
+            QueryString: true
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+        DefaultRootObject: "index.html"
+        Enabled: true
+        PriceClass: "PriceClass_100"
+        HttpVersion: "http2"
+        IPV6Enabled: false
+        Origins:
+          - Id: "SPAOrigin"
+            DomainName: !GetAtt SPABucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity:
+                {
+                  "Fn::Join":
+                    [
+                      "",
+                      [
+                        "origin-access-identity/cloudfront/",
+                        { Ref: SPAOriginAccessIdentity },
+                      ],
+                    ],
+                }
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 3000
+            ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
