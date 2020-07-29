@@ -31,7 +31,7 @@ custom:
       - aws s3 cp --recursive ./dist/ s3://${file(./_config/env.yml):BUCKET_NAME}/ --cache-control "max-age=31536000,public,immutable"
 
 resources:
-  # CloudFront
-  - ${file(./_config/cloudFront.yml)}
   # Nuxt
   - ${file(./_config/s3.yml)} # S3 Origin
+  # CloudFront
+  - ${file(./_config/cloudFront.yml)}

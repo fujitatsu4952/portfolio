@@ -12,7 +12,7 @@ Resources:
       DistributionConfig:
         Aliases: ${file(./_config/env.yml):DOMAINS}
         ViewerCertificate:
-          AcmCertificateArn: arn:aws:acm:us-east-2:036449064740:certificate/29030e2c-ac00-4eae-b648-746c338cd3b1
+          AcmCertificateArn: arn:aws:acm:us-east-1:036449064740:certificate/046b9477-d2d1-4330-bcd6-eeba70b791fe
           SslSupportMethod: sni-only
         DefaultCacheBehavior:
           TargetOriginId: "SPAOrigin"
